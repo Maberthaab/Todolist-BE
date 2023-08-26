@@ -23,10 +23,6 @@ exports.Register = async (req, res) => {
     const { username, password} = req.body;
 
 
-
-    if (emailExisted) {
-        return failedJson(res, "This email address already exists");
-    }
     const salt = 10;
     const hashPassword = await bcrypt.hash(password, salt);
     try {
@@ -122,46 +118,3 @@ exports.Logout = async (req, res) => {
         .json({ success: true, message: "Logout Successfully" });
 };
 
-
-exports.registerAdmin = async (req, res) => {
-    const { email, password } = req.body;
-    const tokenUser = req.user
-
-    // validasi tidak bisa melakukan operasi ini
-    if (tokenUser.role === "member" || tokenUser.role === "admin") {
-        return res.status(200).json({
-            success: false,
-            message: "hanya superadmin yang boleh add user baru dengan role admin",
-
-        });
-    }
-
-    const emailExisted = await User.findOne({
-        where: {
-            email: email,
-        },
-    });
-
-    if (emailExisted) {
-        return failedJson(res, "This email address already exists");
-    }
-    const salt = 10;
-    const hashPassword = await bcrypt.hash(password, salt);
-    try {
-        let user = await User.create({
-            email: email,
-            password: hashPassword,
-            role: "admin",
-        });
-
-        user = JSON.parse(JSON.stringify(user));
-
-        return res.status(200).json({
-            success: true,
-            message: "Register Successfully",
-        });
-    } catch (error) {
-        console.log(error);
-    }
-}
-// Coded By Hafidh
